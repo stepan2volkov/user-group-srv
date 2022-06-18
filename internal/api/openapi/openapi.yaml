@@ -1,0 +1,317 @@
+openapi: "3.0.3"
+info:
+  title: User Group Service
+  description: This is the project for GeekBrains course "Go Backend Development. Level 2"
+  version: 1.0.0
+  contact:
+    email: stepan2volkov@yandex.ru
+
+tags:
+- name: User
+  description: Information about users
+- name: Group
+  description: Information about groups
+- name: UserGroup
+  description: Information about usergroups
+
+paths:
+  /user:
+    post:
+      summary: Create User
+      tags: 
+        - User
+      operationId: CreateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/User"
+      responses:
+        201:
+          description: user created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        400:
+          description: bad request
+          content: {}
+        500:
+          description: internal server error
+          content: {}
+  /user/{userID}:
+    get:
+      summary: Getting info about user
+      tags: 
+        - User
+      operationId: GetUserByID
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: user found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        400:
+          description: bad request
+        404:
+          description: user not found
+        500:
+          description: internal server error
+  /user/nickname/{nickname}:
+    get:
+      summary: Getting info about user by his/her nickname
+      tags: 
+        - User
+      operationId: FindUserByNickname
+      parameters:
+        - name: nickname
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: user found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        404:
+          description: user not found
+        500:
+          description: internal server error
+  /group:
+    post:
+      summary: Create Group
+      tags: 
+        - Group
+      operationId: CreateGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/Group"
+      responses:
+        201:
+          description: group created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        400:
+          description: bad request
+          content: {}
+        500:
+          description: internal server error
+          content: {}
+  /group/{groupID}:
+    get:
+      summary: Getting info about group
+      tags: 
+        - Group
+      operationId: GetGroupByID
+      parameters:
+        - name: groupID
+          in: path
+          description: short URL for redirecting
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: group found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        400:
+          description: bad request
+        404:
+          description: group not found
+        500:
+          description: internal server error
+  /group/title/{title}:
+    get:
+      summary: Getting info about group by its title
+      tags: 
+        - Group
+      operationId: FindGroupByTitle
+      parameters:
+        - name: title
+          in: path
+          description: group title
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: group found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        404:
+          description: group not found
+        500:
+          description: internal server error
+  /usergroup:
+    post:
+      summary: Add user to group
+      tags: 
+        - UserGroup
+      operationId: AddUserToGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/UserGroup"
+      responses:
+        201:
+          description: successful operation
+        404:
+          description: not found
+        500:
+          description: internal server error
+  /usergroup/{userID}/{groupID}:
+    delete:
+      summary: Drop user from group
+      tags: 
+        - UserGroup
+      operationId: DropUserFromGroup
+      parameters:
+        - name: userID
+          in: path
+          description: group title
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: groupID
+          in: path
+          description: group title
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: successful operation
+        400:
+          description: bad request
+        500:
+          description: internal server error
+  /usergroup/groups/{userID}:
+    get:
+      summary: Getting user groups
+      tags: 
+        - UserGroup
+      operationId: FindGroupsByUserID
+      parameters:
+        - name: userID
+          in: path
+          description: group title
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: group found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Group"
+        400:
+          description: bad request
+        500:
+          description: internal server error
+  /usergroup/users/{groupID}:
+    get:
+      summary: Getting users in group
+      tags: 
+        - UserGroup
+      operationId: FindUsersByGroupID
+      parameters:
+        - name: groupID
+          in: path
+          description: group title
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: group found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        400:
+          description: bad request
+        500:
+          description: internal server error
+  
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - nickname
+        - email
+      properties:
+        id:
+          type: string
+          format: uuid
+        nickname:
+          type: string
+        email:
+          type: string
+        created_at:
+          type: string
+          format: datetime
+    Group:
+      type: object
+      required:
+        - title
+        - type
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        type:
+          type: string
+          enum: ["project", "org", "corporate_group", "community"]
+        created_at:
+          type: string
+          format: datetime
+    UserGroup:
+      type: object
+      required:
+        - user_id
+        - group_id
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        group_id:
+          type: string
+          format: uuid
