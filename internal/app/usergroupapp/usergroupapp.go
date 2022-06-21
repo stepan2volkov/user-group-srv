@@ -17,10 +17,8 @@ type UserProvider interface {
 
 // GroupProvider can be db or wrapper of rpc service
 type GroupProvider interface {
-	GetGroupByID(ctx context.Context,
-		id group.GroupID) (group.Group, error)
-	FindGroupsByIDs(ctx context.Context,
-		id []group.GroupID) ([]group.Group, error)
+	GetGroupByID(ctx context.Context, id group.GroupID) (group.Group, error)
+	FindGroupsByIDs(ctx context.Context, id []group.GroupID) ([]group.Group, error)
 }
 
 type UserGroupProvider interface {
@@ -50,17 +48,12 @@ func (a *App) AddUserToGroup(
 	ctx context.Context,
 	ug usergroup.UserGroup,
 ) error {
-
-	// TODO: Проверка, что пользователь и группа существуют
-	// TODO: Проверка, что пользователь не назначен в группу
-	// TODO: Назначение группы пользователю
-
 	_, err := a.gp.GetGroupByID(ctx, ug.GroupID)
 	if err != nil {
 		return fmt.Errorf("error when searching group: %w", err)
 	}
 
-	_, err = a.up.GetUserByID(ctx, user.UserID(ug.GroupID))
+	_, err = a.up.GetUserByID(ctx, user.UserID(ug.UserID))
 	if err != nil {
 		return fmt.Errorf("error when searching user: %w", err)
 	}
@@ -72,9 +65,6 @@ func (a *App) DropUserFromGroup(
 	ctx context.Context,
 	ug usergroup.UserGroup,
 ) error {
-	// TODO: Проверка, что пользователь принадлежит группе
-	// TODO: Удаление пользователя из группы
-
 	_, err := a.gp.GetGroupByID(ctx, ug.GroupID)
 	if err != nil {
 		return fmt.Errorf("error when searching group: %w", err)

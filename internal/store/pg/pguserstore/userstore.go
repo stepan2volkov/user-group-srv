@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgtype"
 	"github.com/stepan2volkov/user-group-srv/internal/app/userapp"
 	"github.com/stepan2volkov/user-group-srv/internal/app/usergroupapp"
 	"github.com/stepan2volkov/user-group-srv/internal/entities/user"
@@ -28,7 +30,7 @@ func New(db *sql.DB) *UserMapper {
 // SaveUser implements app.UserProvider
 func (um *UserMapper) SaveUser(ctx context.Context, u user.User) error {
 	_, err := um.db.ExecContext(ctx,
-		`INSERT INTO users(id, nick_name, email)
+		`INSERT INTO users(id, nickname, email)
 		VALUES ($1, $2, $3)`, u.ID, u.Nickname, u.Email)
 
 	return err
@@ -41,7 +43,9 @@ func (um *UserMapper) GetUserByID(ctx context.Context, id user.UserID) (user.Use
 
 // FindUsersByIDs implements usergroupapp.UserProvider
 func (um *UserMapper) FindUsersByIDs(ctx context.Context, ids []user.UserID) ([]user.User, error) {
-	return um.findUsers(ctx, "id IN ($1)", ids)
+	uuids := &pgtype.UUIDArray{}
+	uuids.Set(ids)
+	return um.findUsers(ctx, "id = ANY($1)", uuids)
 }
 
 // FindUserByName implements app.UserProvider
@@ -55,12 +59,15 @@ func (um *UserMapper) findUser(ctx context.Context, where string,
 	v ...interface{}) (user.User, error) {
 
 	u := user.User{}
+	var id uuid.UUID
 
 	err := um.db.QueryRowContext(ctx, fmt.Sprintf(`
-			SELECT id, nick_name, email, created_at
+			SELECT id, nickname, email, created_at
 			FROM users WHERE %s`, where), v...).Scan(
-		&u.ID, &u.Nickname, &u.Email, &u.CreatedAt,
+		&id, &u.Nickname, &u.Email, &u.CreatedAt,
 	)
+
+	u.ID = user.UserID(id)
 
 	// We don't have to depend only on sql db
 	if errors.Is(err, sql.ErrNoRows) {
@@ -89,11 +96,13 @@ func (um *UserMapper) findUsers(ctx context.Context, where string,
 	}
 
 	for rows.Next() {
+		var id uuid.UUID
 		u := user.User{}
-		err := rows.Scan(&u.ID, &u.Nickname, &u.Email, &u.CreatedAt)
+		err := rows.Scan(&id, &u.Nickname, &u.Email, &u.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
+		u.ID = user.UserID(id)
 
 		ret = append(ret, u)
 	}

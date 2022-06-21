@@ -13,7 +13,9 @@ import (
 
 type UserProvider interface {
 	SaveUser(ctx context.Context, u user.User) error
+	GetUserByID(ctx context.Context, id user.UserID) (user.User, error)
 	FindUserByName(ctx context.Context, name string) (user.User, error)
+	FindUsersByIDs(ctx context.Context, ids []user.UserID) ([]user.User, error)
 }
 
 type App struct {
@@ -26,17 +28,25 @@ func New(up UserProvider) *App {
 	}
 }
 
-func (a *App) CreateUser(ctx context.Context, u user.User) error {
+func (a *App) CreateUser(ctx context.Context, u user.User) (user.UserID, error) {
 	if err := validateEmail(u.Email); err != nil {
-		return err
+		return user.NilUserID(), err
 	}
 	if err := validateName(u.Nickname); err != nil {
-		return err
+		return user.NilUserID(), err
 	}
 
 	u.ID = generateUserID()
 
-	return a.up.SaveUser(ctx, u)
+	if err := a.up.SaveUser(ctx, u); err != nil {
+		return user.NilUserID(), err
+	}
+
+	return u.ID, nil
+}
+
+func (a *App) GetUserByID(ctx context.Context, id user.UserID) (user.User, error) {
+	return a.up.GetUserByID(ctx, id)
 }
 
 func (a *App) FindUserByName(ctx context.Context, name string) (user.User, error) {

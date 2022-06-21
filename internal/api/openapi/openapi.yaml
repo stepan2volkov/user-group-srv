@@ -33,7 +33,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/CreatedUserResp"
         400:
           description: bad request
           content: {}
@@ -100,7 +100,7 @@ paths:
         content:
           application/json:
             schema: 
-              $ref: "#/components/schemas/Group"
+              $ref: "#/components/schemas/CreatedGroupResp"
       responses:
         201:
           description: group created
@@ -270,6 +270,22 @@ paths:
 
 components:
   schemas:
+    CreatedUserResp:
+        type: object
+        required:
+          - id
+        properties:
+          id:
+            type: string
+            format: uuid
+    CreatedGroupResp:
+        type: object
+        required:
+          - id
+        properties:
+          id:
+            type: string
+            format: uuid
     User:
       type: object
       required:
@@ -297,7 +313,7 @@ components:
           format: uuid
         title:
           type: string
-        type:
+        group_type:
           type: string
           enum: ["project", "org", "corporate_group", "community"]
         created_at:

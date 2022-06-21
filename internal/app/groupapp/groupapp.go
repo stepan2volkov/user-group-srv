@@ -15,7 +15,9 @@ func generateGroupID() group.GroupID {
 
 type GroupProvider interface {
 	SaveGroup(ctx context.Context, g group.Group) error
+	GetGroupByID(ctx context.Context, id group.GroupID) (group.Group, error)
 	FindGroupByTitle(ctx context.Context, title string) (group.Group, error)
+	FindGroupsByIDs(ctx context.Context, id []group.GroupID) ([]group.Group, error)
 }
 
 type App struct {
@@ -28,14 +30,22 @@ func New(gp GroupProvider) *App {
 	}
 }
 
-func (a *App) CreateGroup(ctx context.Context, g group.Group) error {
+func (a *App) CreateGroup(ctx context.Context, g group.Group) (group.GroupID, error) {
 	if err := validateTitle(g.Title); err != nil {
-		return err
+		return group.NilGroupID(), err
 	}
 
 	g.ID = generateGroupID()
 
-	return a.gp.SaveGroup(ctx, g)
+	if err := a.gp.SaveGroup(ctx, g); err != nil {
+		return group.NilGroupID(), err
+	}
+
+	return g.ID, nil
+}
+
+func (a *App) GetGroupByID(ctx context.Context, id group.GroupID) (group.Group, error) {
+	return a.gp.GetGroupByID(ctx, id)
 }
 
 func (a *App) FindGroupByTitle(ctx context.Context, title string) (group.Group, error) {

@@ -44,3 +44,7 @@ func GetGroupType(v string) (GroupType, error) {
 		return "", fmt.Errorf("unknown group-type '%s'", v)
 	}
 }
+
+func NilGroupID() GroupID {
+	return GroupID(uuid.Nil)
+}

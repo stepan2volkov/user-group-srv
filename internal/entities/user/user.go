@@ -19,3 +19,7 @@ type User struct {
 	Email     string
 	CreatedAt time.Time
 }
+
+func NilUserID() UserID {
+	return UserID(uuid.Nil)
+}
