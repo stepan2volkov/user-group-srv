@@ -32,6 +32,7 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
+	// Init storages
 	var userStore userapp.UserProvider
 	var groupStore groupapp.GroupProvider
 	var userGroupStore usergroupapp.UserGroupProvider
@@ -54,8 +55,6 @@ func main() {
 
 	log.Println("connection with db has been established")
 
-	// Init storages
-
 	// Init applications
 	userApp := userapp.New(userStore)
 	groupApp := groupapp.New(groupStore)
@@ -75,5 +74,4 @@ func main() {
 	log.Println("application has been started")
 	<-ctx.Done()
 	srv.Stop()
-
 }
