@@ -1,0 +1,27 @@
+version: '3'
+services:
+  database:
+    image: postgres
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: usergroup
+    ports:
+      - 5432:5432
+
+  user-group-srv:
+    build:
+      dockerfile: ./build/Dockerfile
+      context: .
+    image: docker.io/stepan2volkov/user-group-srv
+    restart: always
+    environment:
+      PORT: 8000
+      DSN: 'postgres://test:1234@database:5432/usergroup'
+      READ_TIMEOUT: 30
+      WRITE_TIMEOUT: 30
+      READ_HEADER_TIMEOUT: 30
+    ports:
+      - 8000:8000
+    depends_on:
+      - database

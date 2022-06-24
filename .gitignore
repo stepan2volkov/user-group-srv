@@ -1,0 +1,6 @@
+.vscode/*
+
+bin/oapi-codegen
+bin/goose
+local.env
+build/user-group-srv

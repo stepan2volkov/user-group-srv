@@ -1,0 +1,6 @@
+POST http://localhost:8000/user
+
+{
+    "nickname": "oleg_tinkoff",
+    "email": "cool_oleg@tinkoff.org"
+}

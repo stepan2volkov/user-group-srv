@@ -1,0 +1,6 @@
+POST http://localhost:8000/usergroup
+
+{
+    "user_id": "880508dd-48f7-405a-b0f5-755a05e75063",
+    "group_id": "006a58f2-2b7f-4e54-8986-c9a743db24ef"
+}

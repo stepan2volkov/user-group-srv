@@ -1,0 +1,6 @@
+POST http://localhost:8000/group
+
+{
+    "title": "random",
+    "group_type": "corporate_group"
+}
