@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-group
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: user-group
+  template:
+    metadata:
+      labels:
+        app: user-group
+    spec:
+      containers:
+      - name: user-group
+        image: docker.io/stepan2volkov/user-group-srv
+        imagePullPolicy: Always
+        env:
+          - name: PORT
+            value: "8000"
+          - name: DSN
+            value: "memory"
+          - name: READ_TIMEOUT
+            value: "30"
+          - name: WRITE_TIMEOUT
+            value: "30"
+          - name: READ_HEADER_TIMEOUT
+            value: "30"
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+          - containerPort: 8000
+        livenessProbe:
+          httpGet:
+            path: /__heartbeat__
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /__heartbeat__
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 1
+          
